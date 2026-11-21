@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#102849">
+<title>Muchai Office</title>
+<style>
+:root{--navy:#102849;--navy2:#183b61;--gold:#d8b66a;--paper:#f5f7fa;--ink:#172536;--muted:#68788a;--line:#e3e8ef;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:white;padding:22px 18px 20px;border-bottom:4px solid var(--gold);position:relative}
+.header-top{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.profile-photo{width:66px;height:66px;border-radius:50%;object-fit:cover;object-position:center 24%;border:3px solid var(--gold);box-shadow:0 3px 12px #0005;flex:none}
+.brand{font-weight:800;letter-spacing:1.5px;font-size:20px}.tag{color:#e7cf9b;font-size:10px;letter-spacing:2px;margin-top:3px}
+.greeting{font-size:23px;font-weight:700;margin-top:18px}.sub{color:#d9e2ed;font-size:13px;margin-top:4px}
+main{max-width:760px;margin:auto;padding:16px 14px 94px}
+.section-title{font-weight:750;font-size:17px;margin:18px 2px 10px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tile,.panel{background:white;border:1px solid var(--line);border-radius:15px;padding:14px;box-shadow:0 2px 8px #10284908}
+.tile .ico{font-size:21px}.tile strong{display:block;margin-top:7px}.tile small{color:var(--muted)}
+.panel{margin-bottom:11px}.panel h3{font-size:15px;margin:0 0 10px}
+.stat{font-size:25px;font-weight:800;color:var(--navy)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button,.btn{border:0;border-radius:10px;background:var(--navy);color:white;padding:11px 14px;font-weight:650;font-size:14px;cursor:pointer}
+button.secondary{background:#edf1f6;color:var(--navy)}button.gold{background:var(--gold);color:#172536}
+input,textarea,select{width:100%;border:1px solid #d7dee8;border-radius:10px;padding:12px;font:inherit;background:white;color:var(--ink);margin:5px 0 10px}
+textarea{min-height:110px;resize:vertical}label{font-size:12px;color:var(--muted);font-weight:650}
+.item{padding:10px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+.item:first-of-type{border-top:0}.item small{display:block;color:var(--muted);margin-top:3px}
+.done{text-decoration:line-through;color:#8a97a6}
+nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 3px calc(8px + env(safe-area-inset-bottom));z-index:5}
+nav button{background:transparent;color:var(--muted);padding:7px 5px;font-size:11px;min-width:0;flex:1}
+nav button.active{color:var(--navy);background:#edf2f8}
+nav span{display:block;font-size:18px;margin-bottom:2px}
+.view{display:none}.view.active{display:block}
+.notice{font-size:12px;color:var(--muted);line-height:1.5}
+.empty{color:var(--muted);font-size:13px;padding:12px 0}
+@media(min-width:600px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}main{padding-top:22px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-top">
+    <div>
+      <div class="brand">MUCHAI OFFICE</div><div class="tag">YOUR PERSONAL COMMAND CENTRE</div>
+    </div>
+    <img class="profile-photo" src="profile.jpg" alt="Your profile photo">
+  </div>
+  <div class="greeting">Good day, David.</div>
+  <div class="sub" id="today"></div>
+</header>
+<main>
+<section id="home" class="view active">
+  <div class="section-title">Your office at a glance</div>
+  <div class="grid">
+    <div class="tile"><div class="ico">📔</div><strong>My Diary</strong><small>Private reflections</small></div>
+    <div class="tile"><div class="ico">🗂️</div><strong>Notes & Sermons</strong><small>Ideas and research</small></div>
+    <div class="tile"><div class="ico">🗓️</div><strong>Calendar</strong><small>Upcoming commitments</small></div>
+    <div class="tile"><div class="ico">☑️</div><strong>My Tasks</strong><small><b id="taskCount">0</b> open tasks</small></div>
+    <div class="tile"><div class="ico">⛪</div><strong>Ministry</strong><small>Church responsibilities</small></div>
+    <div class="tile"><div class="ico">📊</div><strong>Finances & Projects</strong><small>Personal overview</small></div>
+  </div>
+  <div class="section-title">Today's priorities</div>
+  <div class="panel"><h3>Tasks to keep in view</h3><div id="homeTasks" class="empty">No tasks added yet.</div><button onclick="show('tasks')">Manage tasks</button></div>
+  <div class="panel"><h3>Quick capture</h3><p class="notice">Save a thought, reminder or idea before you forget it.</p><button class="gold" onclick="show('notes')">＋ Write a quick note</button></div>
+  <div class="panel"><h3>Connections</h3><p class="notice">Google sign-in, Google Calendar sync and cloud backup are planned integrations. They are not connected in this starter version.</p></div>
+</section>
+
+<section id="diary" class="view">
+  <div class="section-title">My Diary</div>
+  <div class="panel">
+    <label for="diaryText">Today's reflection</label>
+    <textarea id="diaryText" placeholder="What happened today? What did you learn? What are you grateful for?"></textarea>
+    <button onclick="saveDiary()">Save diary entry</button>
+  </div>
+  <div class="panel"><h3>Previous entries</h3><div id="diaryList" class="empty">Your saved entries will appear here.</div></div>
+</section>
+
+<section id="notes" class="view">
+  <div class="section-title">Notes & Sermons</div>
+  <div class="panel">
+    <label for="noteTitle">Title</label><input id="noteTitle" placeholder="e.g. Sermon: Dig Until Rehoboth">
+    <label for="noteCategory">Category</label>
+    <select id="noteCategory"><option>Sermon</option><option>Bible Study</option><option>Theological Research</option><option>Lecture Notes</option><option>Personal Idea</option><option>Other</option></select>
+    <label for="noteBody">Your note</label><textarea id="noteBody" placeholder="Start writing here..."></textarea>
+    <button onclick="saveNote()">Save note</button>
+  </div>
+  <div class="panel"><h3>Saved library</h3><div id="noteList" class="empty">Your notes will appear here.</div></div>
+</section>
+
+<section id="tasks" class="view">
+  <div class="section-title">Tasks & Progress</div>
+  <div class="panel">
+    <label for="taskText">What needs to be done?</label><input id="taskText" placeholder="Enter a task">
+    <label for="taskArea">Area</label><select id="taskArea"><option>Personal</option><option>Ministry</option><option>Studies</option><option>Wedding</option><option>Business</option><option>Finance</option></select>
+    <label for="taskDate">Due date (optional)</label><input id="taskDate" type="date">
+    <button onclick="addTask()">Add task</button>
+  </div>
+  <div class="panel"><h3>Task list</h3><div id="taskList" class="empty">No tasks yet. Add your first task above.</div></div>
+</section>
+
+<section id="calendar" class="view">
+  <div class="section-title">Calendar</div>
+  <div class="panel">
+    <h3>Calendar connection</h3>
+    <p class="notice">Google Calendar connection will be added in the next integration stage. This preview does not yet read or change your real calendar.</p>
+    <button class="secondary" onclick="alert('Google Calendar integration is not configured in this preview.')">Connect Google Calendar (coming next)</button>
+  </div>
+  <div class="panel"><h3>Local reminders</h3><p class="notice">For now, use your phone's Clock or Calendar app for alarms that must ring. We will add app reminders after the cloud and notification setup.</p></div>
+</section>
+
+<section id="more" class="view">
+  <div class="section-title">Ministry, Finances & Projects</div>
+  <div class="panel"><h3>Ministry workspace</h3><p class="notice">A place for church plans, service preparation, pastoral follow-ups and ministry projects.</p><button onclick="show('notes')">Create ministry note</button></div>
+  <div class="panel"><h3>Finances</h3><p class="notice">Personal budget, giving, commitments and investment records can be added here. No bank or brokerage accounts are connected.</p></div>
+  <div class="panel"><h3>Projects</h3><p class="notice">Track goals and progress across personal, church and business projects.</p><button onclick="show('tasks')">Add project task</button></div>
+  <div class="panel"><h3>AI Assistant</h3><p class="notice">AI connection is not active in this offline starter. We can add a secure optional AI service later. Never place an API key directly in this page.</p><button class="secondary" onclick="window.open('https://chatgpt.com','_blank')">Open ChatGPT</button></div>
+</section>
+</main>
+<nav>
+<button class="active" data-view="home" onclick="show('home')"><span>⌂</span>Home</button>
+<button data-view="diary" onclick="show('diary')"><span>📔</span>Diary</button>
+<button data-view="notes" onclick="show('notes')"><span>🗒️</span>Notes</button>
+<button data-view="tasks" onclick="show('tasks')"><span>☑</span>Tasks</button>
+<button data-view="calendar" onclick="show('calendar')"><span>▦</span>Calendar</button>
+<button data-view="more" onclick="show('more')"><span>•••</span>More</button>
+</nav>
+<script>
+const $=id=>document.getElementById(id);
+const read=(k,d=[])=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const dateNow=()=>new Date().toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+$('today').textContent=dateNow();
+function show(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));render()}
+function saveDiary(){let t=$('diaryText').value.trim();if(!t)return alert('Write something first.');let a=read('mo_diary');a.unshift({text:t,date:new Date().toISOString()});write('mo_diary',a);$('diaryText').value='';render();alert('Diary entry saved on this device.')}
+function saveNote(){let title=$('noteTitle').value.trim(),body=$('noteBody').value.trim();if(!title||!body)return alert('Add a title and your note.');let a=read('mo_notes');a.unshift({title,body,category:$('noteCategory').value,date:new Date().toISOString()});write('mo_notes',a);$('noteTitle').value='';$('noteBody').value='';render();alert('Note saved on this device.')}
+function addTask(){let text=$('taskText').value.trim();if(!text)return alert('Enter a task.');let a=read('mo_tasks');a.unshift({text,area:$('taskArea').value,due:$('taskDate').value,done:false});write('mo_tasks',a);$('taskText').value='';$('taskDate').value='';render()}
+function toggleTask(i){let a=read('mo_tasks');a[i].done=!a[i].done;write('mo_tasks',a);render()}
+function delItem(key,i){let a=read(key);a.splice(i,1);write(key,a);render()}
+function fmt(d){return new Date(d).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}
+function render(){
+ let tasks=read('mo_tasks'),open=tasks.filter(t=>!t.done);$('taskCount').textContent=open.length;
+ $('homeTasks').innerHTML=open.length?open.slice(0,4).map(t=>`<div class="item"><div>${esc(t.text)}<small>${esc(t.area)}${t.due?' · '+esc(t.due):''}</small></div></div>`).join(''):'No open tasks. Add a task when something needs your attention.';
+ $('taskList').innerHTML=tasks.length?tasks.map((t,i)=>`<div class="item"><div><strong class="${t.done?'done':''}">${esc(t.text)}</strong><small>${esc(t.area)}${t.due?' · Due '+esc(t.due):''}</small></div><div><button class="secondary" onclick="toggleTask(${i})">${t.done?'Undo':'Done'}</button><button class="secondary" onclick="delItem('mo_tasks',${i})">×</button></div></div>`).join(''):'No tasks yet. Add your first task above.';
+ let notes=read('mo_notes');$('noteList').innerHTML=notes.length?notes.map((n,i)=>`<div class="item"><div><strong>${esc(n.title)}</strong><small>${esc(n.category)} · ${fmt(n.date)}</small><p>${esc(n.body).slice(0,180)}</p></div><button class="secondary" onclick="delItem('mo_notes',${i})">×</button></div>`).join(''):'Your notes will appear here.';
+ let diary=read('mo_diary');$('diaryList').innerHTML=diary.length?diary.map((d,i)=>`<div class="item"><div>${esc(d.text)}<small>${fmt(d.date)}</small></div><button class="secondary" onclick="delItem('mo_diary',${i})">×</button></div>`).join(''):'Your saved entries will appear here.';
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+render();
+</script>
+</body>
+</html>
