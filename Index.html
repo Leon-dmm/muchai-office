@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#102849">
+<title>Muchai Office</title>
+<style>
+:root{--navy:#102849;--navy2:#183b61;--gold:#d8b66a;--paper:#f5f7fa;--ink:#172536;--muted:#68788a;--line:#e3e8ef;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:white;padding:22px 18px 20px;border-bottom:4px solid var(--gold);position:relative}
+.header-top{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.profile-photo{width:66px;height:66px;border-radius:50%;object-fit:cover;object-position:center 24%;border:3px solid var(--gold);box-shadow:0 3px 12px #0005;flex:none}
+.brand{font-weight:800;letter-spacing:1.5px;font-size:20px}.tag{color:#e7cf9b;font-size:10px;letter-spacing:2px;margin-top:3px}
+.greeting{font-size:23px;font-weight:700;margin-top:18px}.sub{color:#d9e2ed;font-size:13px;margin-top:4px}
+main{max-width:760px;margin:auto;padding:16px 14px 94px}
+.section-title{font-weight:750;font-size:17px;margin:18px 2px 10px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tile,.panel{background:white;border:1px solid var(--line);border-radius:15px;padding:14px;box-shadow:0 2px 8px #10284908}
+.tile .ico{font-size:21px}.tile strong{display:block;margin-top:7px}.tile small{color:var(--muted)}
+.panel{margin-bottom:11px}.panel h3{font-size:15px;margin:0 0 10px}
+.stat{font-size:25px;font-weight:800;color:var(--navy)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button,.btn{border:0;border-radius:10px;background:var(--navy);color:white;padding:11px 14px;font-weight:650;font-size:14px;cursor:pointer}
+button.secondary{background:#edf1f6;color:var(--navy)}button.gold{background:var(--gold);color:#172536}
+input,textarea,select{width:100%;border:1px solid #d7dee8;border-radius:10px;padding:12px;font:inherit;background:white;color:var(--ink);margin:5px 0 10px}
+textarea{min-height:110px;resize:vertical}label{font-size:12px;color:var(--muted);font-weight:650}
+.item{padding:10px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+.item:first-of-type{border-top:0}.item small{display:block;color:var(--muted);margin-top:3px}
+.done{text-decoration:line-through;color:#8a97a6}
+nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 3px calc(8px + env(safe-area-inset-bottom));z-index:5}
+nav button{background:transparent;color:var(--muted);padding:7px 5px;font-size:11px;min-width:0;flex:1}
+nav button.active{color:var(--navy);background:#edf2f8}
+nav span{display:block;font-size:18px;margin-bottom:2px}
+.view{display:none}.view.active{display:block}
+.notice{font-size:12px;color:var(--muted);line-height:1.5}
+.empty{color:var(--muted);font-size:13px;padding:12px 0}
+@media(min-width:600px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}main{padding-top:22px}}
+
+.auth-screen{min-height:100vh;display:none;align-items:center;justify-content:center;padding:24px;background:linear-gradient(145deg,#102849,#183b61)}
+.auth-card{width:100%;max-width:420px;background:#fff;border-radius:18px;padding:25px;box-shadow:0 12px 36px #0003;text-align:center}
+.auth-card h1{font-size:21px;color:var(--navy);margin:0 0 8px;letter-spacing:1px}
+.auth-card p{color:var(--muted);font-size:14px;line-height:1.55}
+.auth-card button{width:100%;margin-top:12px}
+.auth-error{color:#a33232;font-size:13px;line-height:1.45;margin-top:12px}
+.auth-help{font-size:11px!important}
+.sync-line{font-size:12px;color:#d9e2ed;margin-top:7px}
+body.auth-required header,body.auth-required main,body.auth-required nav{display:none}
+body.auth-required .auth-screen{display:flex}
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+</head>
+<body class="auth-required">
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <h1>MUCHAI OFFICE</h1>
+    <p>Your personal command centre</p>
+    <p>Sign in once with Google to secure your information and enable cloud backup. This phone will remember your sign-in. After the first sign-in, you can continue using your saved information offline.</p>
+    <button id="googleSignIn" onclick="signIn()">Continue with Google</button>
+    <div class="auth-error" id="authError" role="status"></div>
+    <p class="auth-help">Your first sign-in requires internet. Keep this browser's site data to retain your remembered sign-in and local offline records.</p>
+  </div>
+</div>
+<header>
+  <div class="header-top">
+    <div>
+      <div class="brand">MUCHAI OFFICE</div><div class="tag">YOUR PERSONAL COMMAND CENTRE</div>
+    </div>
+    <img class="profile-photo" src="profile.jpg" alt="Your profile photo">
+  </div>
+  <div class="greeting">Good day, David.</div>
+  <div class="sub" id="today"></div>
+  <div class="sync-line" id="syncStatus">Checking your account…</div>
+</header>
+<main>
+<section id="home" class="view active">
+  <div class="section-title">Your office at a glance</div>
+  <div class="grid">
+    <div class="tile"><div class="ico">📔</div><strong>My Diary</strong><small>Private reflections</small></div>
+    <div class="tile"><div class="ico">🗂️</div><strong>Notes & Sermons</strong><small>Ideas and research</small></div>
+    <div class="tile"><div class="ico">🗓️</div><strong>Calendar</strong><small>Upcoming commitments</small></div>
+    <div class="tile"><div class="ico">☑️</div><strong>My Tasks</strong><small><b id="taskCount">0</b> open tasks</small></div>
+    <div class="tile"><div class="ico">⛪</div><strong>Ministry</strong><small>Church responsibilities</small></div>
+    <div class="tile"><div class="ico">📊</div><strong>Finances & Projects</strong><small>Personal overview</small></div>
+  </div>
+  <div class="section-title">Today's priorities</div>
+  <div class="panel"><h3>Tasks to keep in view</h3><div id="homeTasks" class="empty">No tasks added yet.</div><button onclick="show('tasks')">Manage tasks</button></div>
+  <div class="panel"><h3>Quick capture</h3><p class="notice">Save a thought, reminder or idea before you forget it.</p><button class="gold" onclick="show('notes')">＋ Write a quick note</button></div>
+  <div class="panel"><h3>Connections & backup</h3><p class="notice">Your Google account is remembered on this phone. Entries are saved on this device first, then synchronised to your private cloud account when internet is available.</p><div class="actions"><button class="secondary" onclick="syncAll()">Sync now</button><button class="secondary" onclick="exportBackup()">Download backup</button></div><p class="notice" id="accountEmail"></p></div>
+</section>
+
+<section id="diary" class="view">
+  <div class="section-title">My Diary</div>
+  <div class="panel">
+    <label for="diaryText">Today's reflection</label>
+    <textarea id="diaryText" placeholder="What happened today? What did you learn? What are you grateful for?"></textarea>
+    <button onclick="saveDiary()">Save diary entry</button>
+  </div>
+  <div class="panel"><h3>Previous entries</h3><div id="diaryList" class="empty">Your saved entries will appear here.</div></div>
+</section>
+
+<section id="notes" class="view">
+  <div class="section-title">Notes & Sermons</div>
+  <div class="panel">
+    <label for="noteTitle">Title</label><input id="noteTitle" placeholder="e.g. Sermon: Dig Until Rehoboth">
+    <label for="noteCategory">Category</label>
+    <select id="noteCategory"><option>Sermon</option><option>Bible Study</option><option>Theological Research</option><option>Lecture Notes</option><option>Personal Idea</option><option>Other</option></select>
+    <label for="noteBody">Your note</label><textarea id="noteBody" placeholder="Start writing here..."></textarea>
+    <button onclick="saveNote()">Save note</button>
+  </div>
+  <div class="panel"><h3>Saved library</h3><div id="noteList" class="empty">Your notes will appear here.</div></div>
+</section>
+
+<section id="tasks" class="view">
+  <div class="section-title">Tasks & Progress</div>
+  <div class="panel">
+    <label for="taskText">What needs to be done?</label><input id="taskText" placeholder="Enter a task">
+    <label for="taskArea">Area</label><select id="taskArea"><option>Personal</option><option>Ministry</option><option>Studies</option><option>Wedding</option><option>Business</option><option>Finance</option></select>
+    <label for="taskDate">Due date (optional)</label><input id="taskDate" type="date">
+    <button onclick="addTask()">Add task</button>
+  </div>
+  <div class="panel"><h3>Task list</h3><div id="taskList" class="empty">No tasks yet. Add your first task above.</div></div>
+</section>
+
+<section id="calendar" class="view">
+  <div class="section-title">Calendar</div>
+  <div class="panel">
+    <h3>Calendar connection</h3>
+    <p class="notice">Google Calendar connection will be added in the next integration stage. This preview does not yet read or change your real calendar.</p>
+    <button class="secondary" onclick="alert('Google Calendar integration is not configured in this preview.')">Connect Google Calendar (coming next)</button>
+  </div>
+  <div class="panel"><h3>Local reminders</h3><p class="notice">For now, use your phone's Clock or Calendar app for alarms that must ring. We will add app reminders after the cloud and notification setup.</p></div>
+</section>
+
+<section id="more" class="view">
+  <div class="section-title">Ministry, Finances & Projects</div>
+  <div class="panel"><h3>Ministry workspace</h3><p class="notice">A place for church plans, service preparation, pastoral follow-ups and ministry projects.</p><button onclick="show('notes')">Create ministry note</button></div>
+  <div class="panel"><h3>Finances</h3><p class="notice">Personal budget, giving, commitments and investment records can be added here. No bank or brokerage accounts are connected.</p></div>
+  <div class="panel"><h3>Projects</h3><p class="notice">Track goals and progress across personal, church and business projects.</p><button onclick="show('tasks')">Add project task</button></div>
+  <div class="panel"><h3>Account</h3><p class="notice">Your Google sign-in stays active on this phone until you sign out or clear the browser site data.</p><button class="secondary" onclick="signOut()">Sign out</button></div>
+  <div class="panel"><h3>AI Assistant</h3><p class="notice">AI connection is not active in this offline starter. We can add a secure optional AI service later. Never place an API key directly in this page.</p><button class="secondary" onclick="window.open('https://chatgpt.com','_blank')">Open ChatGPT</button></div>
+</section>
+</main>
+<nav>
+<button class="active" data-view="home" onclick="show('home')"><span>⌂</span>Home</button>
+<button data-view="diary" onclick="show('diary')"><span>📔</span>Diary</button>
+<button data-view="notes" onclick="show('notes')"><span>🗒️</span>Notes</button>
+<button data-view="tasks" onclick="show('tasks')"><span>☑</span>Tasks</button>
+<button data-view="calendar" onclick="show('calendar')"><span>▦</span>Calendar</button>
+<button data-view="more" onclick="show('more')"><span>•••</span>More</button>
+</nav>
+<script>
+const $=id=>document.getElementById(id);
+const KEYS={diary:'mo_diary',notes:'mo_notes',tasks:'mo_tasks'};
+const COLLECTIONS={diary:'diary',notes:'notes',tasks:'tasks'};
+const read=(k,d=[])=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+$('today').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+let auth=null,db=null,currentUser=null,syncRunning=false,syncAgain=false,syncTimer=null;
+const firebaseConfig={apiKey:"AIzaSyBg_QrmtuJwVnaXJby7eCNlYRs8v4YIhnI",authDomain:"muchai-office.firebaseapp.com",projectId:"muchai-office",storageBucket:"muchai-office.firebasestorage.app",messagingSenderId:"670813048098",appId:"1:670813048098:web:0f6f0984c2375739a8297b"};
+function setStatus(s){$('syncStatus').textContent=s}
+function setAuthError(s){$('authError').textContent=s||''}
+function makeId(){return (window.crypto&&crypto.randomUUID)?crypto.randomUUID():'mo-'+Date.now()+'-'+Math.random().toString(36).slice(2)}
+function ensureIds(key){const a=read(key);let changed=false;a.forEach(x=>{if(!x.id){x.id=makeId();changed=true}if(!x.updatedAt){x.updatedAt=x.date||new Date().toISOString();changed=true}if(typeof x.deleted!=='boolean'){x.deleted=false;changed=true}});if(changed)write(key,a);return a}
+function activeItems(key){return ensureIds(key).filter(x=>!x.deleted)}
+function show(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$(id).classList.add('active');document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));render()}
+function saveDiary(){const t=$('diaryText').value.trim();if(!t)return alert('Write something first.');const a=ensureIds(KEYS.diary);a.unshift({id:makeId(),text:t,date:new Date().toISOString(),updatedAt:new Date().toISOString(),deleted:false});write(KEYS.diary,a);$('diaryText').value='';render();queueSync();alert('Diary entry saved on this device.')}
+function saveNote(){const title=$('noteTitle').value.trim(),body=$('noteBody').value.trim();if(!title||!body)return alert('Add a title and your note.');const a=ensureIds(KEYS.notes);a.unshift({id:makeId(),title,body,category:$('noteCategory').value,date:new Date().toISOString(),updatedAt:new Date().toISOString(),deleted:false});write(KEYS.notes,a);$('noteTitle').value='';$('noteBody').value='';render();queueSync();alert('Note saved on this device.')}
+function addTask(){const text=$('taskText').value.trim();if(!text)return alert('Enter a task.');const a=ensureIds(KEYS.tasks);a.unshift({id:makeId(),text,area:$('taskArea').value,due:$('taskDate').value,done:false,date:new Date().toISOString(),updatedAt:new Date().toISOString(),deleted:false});write(KEYS.tasks,a);$('taskText').value='';$('taskDate').value='';render();queueSync()}
+function toggleTask(id){const a=ensureIds(KEYS.tasks),x=a.find(v=>v.id===id);if(!x)return;x.done=!x.done;x.updatedAt=new Date().toISOString();write(KEYS.tasks,a);render();queueSync()}
+function delItem(key,id){const a=ensureIds(key),x=a.find(v=>v.id===id);if(!x)return;x.deleted=true;x.updatedAt=new Date().toISOString();write(key,a);render();queueSync()}
+function fmt(d){return new Date(d).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function render(){
+ const tasks=activeItems(KEYS.tasks),open=tasks.filter(t=>!t.done);$('taskCount').textContent=open.length;
+ $('homeTasks').innerHTML=open.length?open.slice(0,4).map(t=>`<div class="item"><div>${esc(t.text)}<small>${esc(t.area)}${t.due?' · '+esc(t.due):''}</small></div></div>`).join(''):'No open tasks. Add a task when something needs your attention.';
+ $('taskList').innerHTML=tasks.length?tasks.map(t=>`<div class="item"><div><strong class="${t.done?'done':''}">${esc(t.text)}</strong><small>${esc(t.area)}${t.due?' · Due '+esc(t.due):''}</small></div><div><button class="secondary" onclick="toggleTask('${t.id}')">${t.done?'Undo':'Done'}</button><button class="secondary" onclick="delItem('mo_tasks','${t.id}')">×</button></div></div>`).join(''):'No tasks yet. Add your first task above.';
+ const notes=activeItems(KEYS.notes);$('noteList').innerHTML=notes.length?notes.map(n=>`<div class="item"><div><strong>${esc(n.title)}</strong><small>${esc(n.category)} · ${fmt(n.date)}</small><p>${esc(n.body).slice(0,180)}</p></div><button class="secondary" onclick="delItem('mo_notes','${n.id}')">×</button></div>`).join(''):'Your notes will appear here.';
+ const diary=activeItems(KEYS.diary);$('diaryList').innerHTML=diary.length?diary.map(d=>`<div class="item"><div>${esc(d.text)}<small>${fmt(d.date)}</small></div><button class="secondary" onclick="delItem('mo_diary','${d.id}')">×</button></div>`).join(''):'Your saved entries will appear here.';
+}
+function exportBackup(){const data={app:'Muchai Office',exportedAt:new Date().toISOString(),diary:ensureIds(KEYS.diary),notes:ensureIds(KEYS.notes),tasks:ensureIds(KEYS.tasks)};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='muchai-office-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url)}
+function signIn(){if(!auth){setAuthError('Sign-in is still loading. Please wait and try again.');return}setAuthError('');const button=$('googleSignIn');button.disabled=true;button.textContent='Connecting to Google…';const provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(()=>auth.signInWithPopup(provider)).then(result=>{if(result&&result.user){currentUser=result.user;document.body.classList.remove('auth-required');$('accountEmail').textContent='Signed in as '+(result.user.email||'your Google account');setStatus('Signed in · Preparing cloud sync…');render();syncAll()}}).catch(e=>{console.error('Google sign-in error:',e);let message='Google sign-in failed: '+(e.message||e.code||'Unknown error');if(e.code==='auth/popup-blocked')message='Chrome blocked the sign-in window. Allow pop-ups for this website and try again.';else if(e.code==='auth/unauthorized-domain')message='This website is not authorised in Firebase. Add leon-dmm.github.io under Authentication → Settings → Authorized domains.';else if(e.code==='auth/operation-not-allowed')message='Google sign-in is not enabled in Firebase Authentication.';else if(e.code==='auth/popup-closed-by-user')message='The Google sign-in window was closed before sign-in finished. Please try again.';setAuthError(message)}).finally(()=>{button.disabled=false;button.textContent='Continue with Google'})}
+function signOut(){if(confirm('Sign out on this phone? Your local records will remain on this device.'))auth.signOut().catch(e=>alert('Sign-out failed: '+e.message))}
+function mergeRecords(local,cloud){const map=new Map();[...cloud,...local].forEach(x=>{if(!x||!x.id)return;const old=map.get(x.id);if(!old||Date.parse(x.updatedAt||x.date||0)>=Date.parse(old.updatedAt||old.date||0))map.set(x.id,x)});return [...map.values()].sort((a,b)=>Date.parse(b.date||b.updatedAt||0)-Date.parse(a.date||a.updatedAt||0))}
+async function syncCollection(key,user){const ref=db.collection('users').doc(user.uid).collection(COLLECTIONS[key]);const local=ensureIds(KEYS[key]);const snap=await ref.get();const cloud=snap.docs.map(d=>({...d.data(),id:d.id}));const merged=mergeRecords(local,cloud);write(KEYS[key],merged);for(let i=0;i<merged.length;i+=450){const batch=db.batch();merged.slice(i,i+450).forEach(x=>batch.set(ref.doc(x.id),x));await batch.commit()}}
+async function syncAll(){if(!currentUser||!db)return;if(!navigator.onLine){setStatus('Offline — changes are saved on this phone.');return}if(syncRunning){syncAgain=true;return}syncRunning=true;setStatus('Synchronising your information…');try{await syncCollection('diary',currentUser);await syncCollection('notes',currentUser);await syncCollection('tasks',currentUser);render();setStatus('Cloud backup updated · All caught up')}catch(e){console.error(e);setStatus('Saved on this phone · Cloud sync needs attention');if(e.code==='permission-denied')setAuthError('Firestore security rules need to be published before cloud backup can work. Your local records remain on this phone.')}finally{syncRunning=false;if(syncAgain){syncAgain=false;syncAll()}}}
+function queueSync(){if(!currentUser||!navigator.onLine)return;clearTimeout(syncTimer);syncTimer=setTimeout(syncAll,1000)}
+function startFirebase(){try{if(!window.firebase){setAuthError('Firebase could not load. Connect to the internet and refresh.');return}firebase.initializeApp(firebaseConfig);auth=firebase.auth();db=firebase.firestore();auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.warn);auth.onAuthStateChanged(user=>{currentUser=user||null;if(user){document.body.classList.remove('auth-required');$('accountEmail').textContent='Signed in as '+(user.email||'your Google account');setStatus(navigator.onLine?'Signed in · Preparing cloud sync…':'Signed in · Offline mode');render();if(navigator.onLine)syncAll()}else{document.body.classList.add('auth-required');$('accountEmail').textContent='';setStatus('Sign in to continue')}})}catch(e){console.error(e);setAuthError('Firebase setup error: '+e.message)}}
+window.addEventListener('online',()=>{if(currentUser){setStatus('Internet restored · Synchronising…');syncAll()}});window.addEventListener('offline',()=>setStatus('Offline — your changes are saved on this phone.'));
+render();startFirebase();
+</script>
+</body>
+</html>
